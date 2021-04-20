@@ -1,12 +1,18 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
 using static System.Console;
 
 namespace HighScoreManager
 {
     class Program
     {
+        static readonly HttpClient httpClient = new HttpClient();
+
         static void Main(string[] args)
         {
+            httpClient.BaseAddress = new Uri("https://localhost:5001/api/");
 
             CursorVisible = false;
 
@@ -56,8 +62,31 @@ namespace HighScoreManager
 
         private static void ListGame()
         {
-            WriteLine("List products...");
+            var response = httpClient.GetAsync("games")
+                 .GetAwaiter()
+                 .GetResult();
+
+            if(response.IsSuccessStatusCode)
+            {
+                var jsonString = response.Content.ReadAsStringAsync()
+                    .Result;
+
+                var games = JsonConvert.DeserializeObject<IEnumerable<Game>>(jsonString);
+                WriteLine("Id      Game");
+                foreach (var game in games)
+                {
+                    WriteLine($"{game.Id}\t{game.Title}");
+                }
+            }
+
             ReadKey(true);
+        }
+
+        public class Game
+        {
+            public int Id { get; set; }
+
+            public string Title { get; set; }
         }
     }
 }
