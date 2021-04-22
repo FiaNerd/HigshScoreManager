@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text;
 using System.Threading;
 using static System.Console;
 
@@ -216,7 +218,7 @@ namespace HighScoreManager
                     string addGenre = ReadLine().Trim().ToUpper();
 
                     SetCursorPosition(15, 4);
-                    string addUrl = ReadLine().Trim().ToUpper();
+                    string addImageUrl = ReadLine().Trim();
 
                     SetCursorPosition(5, 8);
                     WriteLine("Is this correct [Y]es / [N]o?  [Esc] Back to main");
@@ -229,44 +231,58 @@ namespace HighScoreManager
 
                     Clear();
 
-                    //    HighScore highScore = new HighScore(GameId, Player, Date, score);
-
-                    //    if (userInput == ConsoleKey.Y)
-                    //    {
-                    //        if (!highScore.CategoryName.Any(HighScore))
-                    //        {
-                    //            InsertCategoryIntoDataBase(highScore);
-                    //            Console.WriteLine($"Highscore {highScore.Player} registerd");
-                    //            Thread.Sleep(2000);
-                    //            Console.Clear();
-                    //        }
-                    //        else
-                    //        {
-
-                    //            Console.WriteLine($"This category {userCategoryName} is occupied");
-                    //            Thread.Sleep(2000);
-                    //            Console.Clear();
-                    //            programRuning = false;
-                    //            programRuning = false;
-
-                    //        }
-
-
-                    //programRuning = false;
-
-                    if (userInput == ConsoleKey.N)
+                    if (userInput == ConsoleKey.Y)
                     {
-                        programRuning = true;
-                        Clear();
-                    }
-                    else if (userInput == ConsoleKey.Escape)
-                    {
-                        Clear();
+
+                        Game games = new Game()
+                        {
+                            Title = addTitle,
+                            Description = addDescription,
+                            Genre = addGenre,
+                            ReleaseYear = addRealeaseYear,
+                            ImageUrl = addImageUrl
+
+                        };
+
+                        string json = JsonConvert.SerializeObject(games);
+
+                        StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+
+                        var response = httpClient.PostAsync("https://localhost:5001/api/games/", data)
+                             .Result;
+
+                        var str = response.Content.ReadAsStringAsync();
+                        Console.WriteLine($"Game {games.Title} registerd");
+                        Thread.Sleep(2000);
+                        Console.Clear();
+                        //}
+                        //else
+                        //{
+
+                        //    Console.WriteLine($"This game {games.Title} is occupied");
+                        //    Thread.Sleep(2000);
+                        //    Console.Clear();
+                        //    programRuning = false;
+                        //    programRuning = false;
+
+                        //}
+
                         programRuning = false;
-                        MainMenu();
-                        Clear();
+
                     }
 
+                        if (userInput == ConsoleKey.N)
+                        {
+                            programRuning = true;
+                            Clear();
+                        }
+                        else if (userInput == ConsoleKey.Escape)
+                        {
+                            Clear();
+                            programRuning = false;
+                            MainMenu();
+                            Clear();
+                        }
                 }
                 catch (Exception e)
                 {
@@ -299,7 +315,7 @@ namespace HighScoreManager
 
             public string ReleaseYear { get; set; }
 
-            public Uri ImageUrl { get; set; }
+            public string ImageUrl { get; set; }
         }
 
         public class HighScore
