@@ -306,20 +306,18 @@ namespace HighScoreManager
 
             response.Content.ReadAsStringAsync();
 
-            WriteLine($"Game {games.Title} registerd");
-            Thread.Sleep(2000);
-            Clear();
-            //}
-            //else
-            //{
-
-            //    Console.WriteLine($"This game {games.Title} is occupied");
-            //    Thread.Sleep(2000);
-            //    Console.Clear();
-            //    programRuning = false;
-            //    programRuning = false;
-
-            //}
+            if (response.IsSuccessStatusCode)
+            {
+                WriteLine($"Game {games.Title} registerd");
+                Thread.Sleep(2000);
+                Clear();
+            }
+            else
+            {
+                WriteLine($"This game {games.Title} is occupied");
+                Thread.Sleep(2000);
+                Clear();
+            }
         }
 
         private static void DeleteGame()
@@ -339,14 +337,14 @@ namespace HighScoreManager
             if (response.IsSuccessStatusCode)
             {
                 Clear();
-                WriteLine("Succcesfull delete");
+                WriteLine($"{gameId.Id} Succcesfull delete");
                 Thread.Sleep(2000);
                 Clear();
             }
             else
             {
                 Clear();
-                Console.WriteLine("Someting went wrong, hotel not deleted");
+                WriteLine($"Someting went wrong, game {gameId.Id} not deleted");
                 Thread.Sleep(2000);
                 Clear();
             }
