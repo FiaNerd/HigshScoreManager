@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
 using System.Threading;
+using static HighScoreManager.Program;
 using static System.Console;
 
 namespace HighScoreManager
@@ -59,7 +60,7 @@ namespace HighScoreManager
 
                     case ConsoleKey.D4:
                     case ConsoleKey.NumPad4:
-                        DeletGame();
+                        DeleteGame();
                         break;
 
                     case ConsoleKey.D5:
@@ -76,6 +77,9 @@ namespace HighScoreManager
 
         }
 
+
+
+
         private static void RegisterHighScore()
         {
             bool programRuning = true;
@@ -90,7 +94,7 @@ namespace HighScoreManager
                 try
                 {
                     SetCursorPosition(10, 0);
-                    string addGame = ReadLine().Trim().ToUpper();
+                    int addGame = Convert.ToInt32(ReadLine());
 
                     SetCursorPosition(10, 1);
                     string addPlayer = ReadLine().Trim().ToUpper();
@@ -101,7 +105,7 @@ namespace HighScoreManager
                     SetCursorPosition(10, 3);
                     int addScore = int.Parse(ReadLine().Trim());
 
-                    SetCursorPosition(5, 12);
+                    SetCursorPosition(5, 8);
                     WriteLine("Is this correct [Y]es / [N]o?  [Esc] Back to main");
                     var userInput = ReadKey(true).Key;
 
@@ -109,47 +113,64 @@ namespace HighScoreManager
                     {
                         userInput = ReadKey(true).Key;
                     }
-
                     Clear();
 
-                    //    HighScore highScore = new HighScore(GameId, Player, Date, score);
 
-                    //    if (userInput == ConsoleKey.Y)
-                    //    {
-                    //        if (!highScore.CategoryName.Any(HighScore))
-                    //        {
-                    //            InsertCategoryIntoDataBase(highScore);
-                    //            Console.WriteLine($"Highscore {highScore.Player} registerd");
-                    //            Thread.Sleep(2000);
-                    //            Console.Clear();
-                    //        }
-                    //        else
-                    //        {
-
-                    //            Console.WriteLine($"This category {userCategoryName} is occupied");
-                    //            Thread.Sleep(2000);
-                    //            Console.Clear();
-                    //            programRuning = false;
-                    //            programRuning = false;
-
-                    //        }
-
-
-                    //programRuning = false;
-
-                    if (userInput == ConsoleKey.N)
+                    if (userInput == ConsoleKey.Y)
                     {
-                        programRuning = true;
-                        Clear();
-                    }
-                    else if (userInput == ConsoleKey.Escape)
-                    {
-                        Clear();
+                        HighScore highScores = new HighScore()
+                        {
+                            Player = addPlayer,
+                            Date = addDate,
+                            Score = addScore,
+                            GameId = addGame
+                        };
+
+                        string json = JsonConvert.SerializeObject(highScores);
+
+                        var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+                        var response = httpClient.PostAsync("https://localhost:5001/api/highscores/", data)
+                             .Result;
+
+                        response.Content.ReadAsStringAsync();
+
+
+                        //if (!highScore.CategoryName.Any(HighScore))
+
+                        //{
+                        //InsertCategoryIntoDataBase(highScore);
+                        //Console.WriteLine($"Highscore {highScore.Player} registerd");
+                        //Thread.Sleep(2000);
+                        //Console.Clear();
+                        //}
+                        //        else
+                        //        {
+
+                        //            Console.WriteLine($"This category {userCategoryName} is occupied");
+                        //            Thread.Sleep(2000);
+                        //            Console.Clear();
+                        //            programRuning = false;
+                        //            programRuning = false;
+
+                        //        }
+
+
                         programRuning = false;
-                        MainMenu();
-                        Clear();
-                    }
 
+                        if (userInput == ConsoleKey.N)
+                        {
+                            programRuning = true;
+                            Clear();
+                        }
+                        else if (userInput == ConsoleKey.Escape)
+                        {
+                            Clear();
+                            programRuning = false;
+                            MainMenu();
+                            Clear();
+                        }
+                    }
                 }
                 catch (Exception e)
                 {
@@ -166,7 +187,6 @@ namespace HighScoreManager
 
         private static void ListGame()
         {
-
             var response = httpClient.GetAsync("games")
                  .GetAwaiter()
                  .GetResult();
@@ -233,56 +253,24 @@ namespace HighScoreManager
 
                     if (userInput == ConsoleKey.Y)
                     {
-
-                        Game games = new Game()
-                        {
-                            Title = addTitle,
-                            Description = addDescription,
-                            Genre = addGenre,
-                            ReleaseYear = addRealeaseYear,
-                            ImageUrl = addImageUrl
-
-                        };
-
-                        string json = JsonConvert.SerializeObject(games);
-
-                        StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
-
-                        var response = httpClient.PostAsync("https://localhost:5001/api/games/", data)
-                             .Result;
-
-                        var str = response.Content.ReadAsStringAsync();
-                        Console.WriteLine($"Game {games.Title} registerd");
-                        Thread.Sleep(2000);
-                        Console.Clear();
-                        //}
-                        //else
-                        //{
-
-                        //    Console.WriteLine($"This game {games.Title} is occupied");
-                        //    Thread.Sleep(2000);
-                        //    Console.Clear();
-                        //    programRuning = false;
-                        //    programRuning = false;
-
-                        //}
+                        PostGame(addTitle, addDescription, addRealeaseYear, addGenre, addImageUrl);
 
                         programRuning = false;
 
                     }
 
-                        if (userInput == ConsoleKey.N)
-                        {
-                            programRuning = true;
-                            Clear();
-                        }
-                        else if (userInput == ConsoleKey.Escape)
-                        {
-                            Clear();
-                            programRuning = false;
-                            MainMenu();
-                            Clear();
-                        }
+                    if (userInput == ConsoleKey.N)
+                    {
+                        programRuning = true;
+                        Clear();
+                    }
+                    else if (userInput == ConsoleKey.Escape)
+                    {
+                        Clear();
+                        programRuning = false;
+                        MainMenu();
+                        Clear();
+                    }
                 }
                 catch (Exception e)
                 {
@@ -297,38 +285,101 @@ namespace HighScoreManager
 
         }
 
-        private static void DeletGame()
+        private static void PostGame(string addTitle, string addDescription, string addRealeaseYear, string addGenre, string addImageUrl)
         {
-            WriteLine("ID: ");
-            int id = int.Parse(ReadLine().Trim());
+            Game games = new Game()
+            {
+                Title = addTitle,
+                Description = addDescription,
+                Genre = addGenre,
+                ReleaseYear = addRealeaseYear,
+                ImageUrl = addImageUrl
+
+            };
+
+            string json = JsonConvert.SerializeObject(games);
+
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = httpClient.PostAsync("https://localhost:5001/api/games/", data)
+                 .Result;
+
+            response.Content.ReadAsStringAsync();
+
+            WriteLine($"Game {games.Title} registerd");
+            Thread.Sleep(2000);
+            Clear();
+            //}
+            //else
+            //{
+
+            //    Console.WriteLine($"This game {games.Title} is occupied");
+            //    Thread.Sleep(2000);
+            //    Console.Clear();
+            //    programRuning = false;
+            //    programRuning = false;
+
+            //}
         }
 
-        public class Game
+        private static void DeleteGame()
         {
-            public int Id { get; set; }
+            Write("ID: ");
+            int deletId = int.Parse(ReadLine().Trim());
 
-            public string Title { get; set; }
+            Game gameId = new Game()
+            {
+                Id = deletId
+            };
 
-            public string Description { get; set; }
+            var response = httpClient.DeleteAsync("https://localhost:5001/api/games/" + gameId.Id).Result;
 
-            public string Genre { get; set; }
+            response.Content.ReadAsStringAsync();
 
-            public string ReleaseYear { get; set; }
-
-            public string ImageUrl { get; set; }
+            if (response.IsSuccessStatusCode)
+            {
+                Clear();
+                WriteLine("Succcesfull delete");
+                Thread.Sleep(2000);
+                Clear();
+            }
+            else
+            {
+                Clear();
+                Console.WriteLine("Someting went wrong, hotel not deleted");
+                Thread.Sleep(2000);
+                Clear();
+            }
         }
+    }
 
-        public class HighScore
-        {
-            public int Id { get; set; }
+    public class Game
+    {
+        public int Id { get; set; }
 
-            public int GameId { get; set; }
+        public string Title { get; set; }
 
-            public string Player { get; set; }
+        public string Description { get; set; }
 
-            public DateTime Date { get; set; }
+        public string Genre { get; set; }
 
-            public int Score { get; set; }
-        }
+        public string ReleaseYear { get; set; }
+
+        public string ImageUrl { get; set; }
+    }
+
+    public class HighScore
+    {
+        public int Id { get; set; }
+
+        public string Player { get; set; }
+
+        public string Date { get; set; }
+
+        public int Score { get; set; }
+
+        public int GameId { get; set; }
+
+        public Game Game { get; set; }
     }
 }
