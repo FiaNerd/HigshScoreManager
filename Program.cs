@@ -78,23 +78,21 @@ namespace HighScoreManager
         }
 
 
-
-
         private static void RegisterHighScore()
         {
             bool programRuning = true;
 
             do
             {
-                WriteLine("Game:");
-                WriteLine("Player:");
-                WriteLine("Date:");
-                WriteLine("Score:");
+                WriteLine("Game: ");
+                WriteLine("Player: ");
+                WriteLine("Date: ");
+                WriteLine("Score: ");
 
                 try
                 {
                     SetCursorPosition(10, 0);
-                    int addGame = Convert.ToInt32(ReadLine());
+                    int addTitle = int.Parse(ReadLine().Trim()); 
 
                     SetCursorPosition(10, 1);
                     string addPlayer = ReadLine().Trim().ToUpper();
@@ -118,59 +116,24 @@ namespace HighScoreManager
 
                     if (userInput == ConsoleKey.Y)
                     {
-                        HighScore highScores = new HighScore()
-                        {
-                            Player = addPlayer,
-                            Date = addDate,
-                            Score = addScore,
-                            GameId = addGame
-                        };
-
-                        string json = JsonConvert.SerializeObject(highScores);
-
-                        var data = new StringContent(json, Encoding.UTF8, "application/json");
-
-                        var response = httpClient.PostAsync("https://localhost:5001/api/highscores/", data)
-                             .Result;
-
-                        response.Content.ReadAsStringAsync();
-
-
-                        //if (!highScore.CategoryName.Any(HighScore))
-
-                        //{
-                        //InsertCategoryIntoDataBase(highScore);
-                        //Console.WriteLine($"Highscore {highScore.Player} registerd");
-                        //Thread.Sleep(2000);
-                        //Console.Clear();
-                        //}
-                        //        else
-                        //        {
-
-                        //            Console.WriteLine($"This category {userCategoryName} is occupied");
-                        //            Thread.Sleep(2000);
-                        //            Console.Clear();
-                        //            programRuning = false;
-                        //            programRuning = false;
-
-                        //        }
-
+                        PostGame(addTitle, addPlayer, addDate, addScore);
 
                         programRuning = false;
-
-                        if (userInput == ConsoleKey.N)
-                        {
-                            programRuning = true;
-                            Clear();
-                        }
-                        else if (userInput == ConsoleKey.Escape)
-                        {
-                            Clear();
-                            programRuning = false;
-                            MainMenu();
-                            Clear();
-                        }
                     }
+
+                    if (userInput == ConsoleKey.N)
+                    {
+                        programRuning = true;
+                        Clear();
+                    }
+                    else if (userInput == ConsoleKey.Escape)
+                    {
+                        Clear();
+                        programRuning = false;
+                        MainMenu();
+                        Clear();
+                    }
+
                 }
                 catch (Exception e)
                 {
@@ -184,6 +147,40 @@ namespace HighScoreManager
             } while (programRuning);
         }
 
+        private static void PostGame(int addTitle, string addPlayer, string addDate, int addScore)
+        {
+            HighScore highScores = new HighScore()
+            {
+                GameId = addTitle,
+                Player = addPlayer,
+                Date = addDate,
+                Score = addScore,
+            };
+
+            string json = JsonConvert.SerializeObject(highScores);
+
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = httpClient.PostAsync("https://localhost:5001/api/highscores/", data)
+                 .Result;
+
+            response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                Clear();
+                WriteLine($"Highscore {highScores.Score} registerd");
+                Thread.Sleep(2000);
+                Clear();
+            }
+            else
+            {
+                Clear();
+                WriteLine($"Something went wrong, couldn't register this {highScores.Score} highscore!");
+                Thread.Sleep(2000);
+                Clear();
+            }
+        }
 
         private static void ListGame()
         {
@@ -219,8 +216,8 @@ namespace HighScoreManager
             {
                 WriteLine("Title:");
                 WriteLine("Description:");
-                WriteLine("Release Year:");
                 WriteLine("Genre:");
+                WriteLine("Release Year:");
                 WriteLine("Image URL");
 
                 try
@@ -232,10 +229,10 @@ namespace HighScoreManager
                     string addDescription = ReadLine().Trim().ToUpper();
 
                     SetCursorPosition(15, 2);
-                    string addRealeaseYear = ReadLine().Trim().ToUpper();
+                    string addGenre = ReadLine().Trim().ToUpper();
 
                     SetCursorPosition(15, 3);
-                    string addGenre = ReadLine().Trim().ToUpper();
+                    string addRealeaseYear = ReadLine().Trim().ToUpper();
 
                     SetCursorPosition(15, 4);
                     string addImageUrl = ReadLine().Trim();
@@ -253,7 +250,7 @@ namespace HighScoreManager
 
                     if (userInput == ConsoleKey.Y)
                     {
-                        PostGame(addTitle, addDescription, addRealeaseYear, addGenre, addImageUrl);
+                        PostGame(addTitle, addDescription, addGenre, addRealeaseYear, addImageUrl);
 
                         programRuning = false;
 
@@ -285,7 +282,7 @@ namespace HighScoreManager
 
         }
 
-        private static void PostGame(string addTitle, string addDescription, string addRealeaseYear, string addGenre, string addImageUrl)
+        private static void PostGame(string addTitle, string addDescription, string addGenre, string addRealeaseYear, string addImageUrl)
         {
             Game games = new Game()
             {
@@ -330,7 +327,8 @@ namespace HighScoreManager
                 Id = deletId
             };
 
-            var response = httpClient.DeleteAsync("https://localhost:5001/api/games/" + gameId.Id).Result;
+            var response = httpClient.DeleteAsync("https://localhost:5001/api/games/" + gameId.Id)
+                .Result;
 
             response.Content.ReadAsStringAsync();
 
@@ -365,6 +363,7 @@ namespace HighScoreManager
 
         public string ImageUrl { get; set; }
     }
+
 
     public class HighScore
     {
