@@ -2,10 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Text;
 using System.Threading;
-using static HighScoreManager.Program;
 using static System.Console;
 
 namespace HighScoreManager
@@ -92,7 +90,7 @@ namespace HighScoreManager
                 try
                 {
                     SetCursorPosition(10, 0);
-                    int addTitle = int.Parse(ReadLine().Trim()); 
+                    string addGameTitle = ReadLine().Trim(); 
 
                     SetCursorPosition(10, 1);
                     string addPlayer = ReadLine().Trim().ToUpper();
@@ -116,7 +114,7 @@ namespace HighScoreManager
 
                     if (userInput == ConsoleKey.Y)
                     {
-                        PostGame(addTitle, addPlayer, addDate, addScore);
+                        PostGame(addGameTitle, addPlayer, addDate, addScore);
 
                         programRuning = false;
                     }
@@ -147,11 +145,12 @@ namespace HighScoreManager
             } while (programRuning);
         }
 
-        private static void PostGame(int addTitle, string addPlayer, string addDate, int addScore)
+        private static void PostGame(string addGameTitle, string addPlayer, string addDate, int addScore)
         {
+
             HighScore highScores = new HighScore()
             {
-                GameId = addTitle,
+                GTitle = addGameTitle,
                 Player = addPlayer,
                 Date = addDate,
                 Score = addScore,
@@ -322,12 +321,12 @@ namespace HighScoreManager
             Write("ID: ");
             int deletId = int.Parse(ReadLine().Trim());
 
-            Game gameId = new Game()
+            Game game = new Game()
             {
                 Id = deletId
             };
 
-            var response = httpClient.DeleteAsync("https://localhost:5001/api/games/" + gameId.Id)
+            var response = httpClient.DeleteAsync("https://localhost:5001/api/games/" + game.Id)
                 .Result;
 
             response.Content.ReadAsStringAsync();
@@ -335,48 +334,17 @@ namespace HighScoreManager
             if (response.IsSuccessStatusCode)
             {
                 Clear();
-                WriteLine($"{gameId.Id} Succcesfull delete");
+                WriteLine($"{game.Id} Succcesfull delete");
                 Thread.Sleep(2000);
                 Clear();
             }
             else
             {
                 Clear();
-                WriteLine($"Someting went wrong, game {gameId.Id} not deleted");
+                WriteLine($"Someting went wrong, game {game.Id} not deleted");
                 Thread.Sleep(2000);
                 Clear();
             }
         }
-    }
-
-    public class Game
-    {
-        public int Id { get; set; }
-
-        public string Title { get; set; }
-
-        public string Description { get; set; }
-
-        public string Genre { get; set; }
-
-        public string ReleaseYear { get; set; }
-
-        public string ImageUrl { get; set; }
-    }
-
-
-    public class HighScore
-    {
-        public int Id { get; set; }
-
-        public string Player { get; set; }
-
-        public string Date { get; set; }
-
-        public int Score { get; set; }
-
-        public int GameId { get; set; }
-
-        public Game Game { get; set; }
     }
 }
