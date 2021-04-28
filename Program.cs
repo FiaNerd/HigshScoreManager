@@ -22,6 +22,7 @@ namespace HighScoreManager
 
         }
 
+
         private static void MainMenu()
         {
 
@@ -145,6 +146,7 @@ namespace HighScoreManager
             } while (programRuning);
         }
 
+
         private static void PostGame(string addGameTitle, string addPlayer, string addDate, int addScore)
         {
 
@@ -181,6 +183,7 @@ namespace HighScoreManager
             }
         }
 
+
         private static void ListGame()
         {
             var response = httpClient.GetAsync("games")
@@ -213,11 +216,11 @@ namespace HighScoreManager
 
             do
             {
-                WriteLine("Title:");
-                WriteLine("Description:");
-                WriteLine("Genre:");
-                WriteLine("Release Year:");
-                WriteLine("Image URL");
+                WriteLine("Title: ");
+                WriteLine("Description: ");
+                WriteLine("Genre: ");
+                WriteLine("Release Year: ");
+                WriteLine("Image URL: ");
 
                 try
                 {
@@ -252,7 +255,6 @@ namespace HighScoreManager
                         PostGame(addTitle, addDescription, addGenre, addRealeaseYear, addImageUrl);
 
                         programRuning = false;
-
                     }
 
                     if (userInput == ConsoleKey.N)
@@ -278,8 +280,8 @@ namespace HighScoreManager
                 }
 
             } while (programRuning);
-
         }
+
 
         private static void PostGame(string addTitle, string addDescription, string addGenre, string addRealeaseYear, string addImageUrl)
         {
@@ -290,7 +292,6 @@ namespace HighScoreManager
                 Genre = addGenre,
                 ReleaseYear = addRealeaseYear,
                 ImageUrl = addImageUrl
-
             };
 
             string json = JsonConvert.SerializeObject(games);
@@ -308,13 +309,14 @@ namespace HighScoreManager
                 Thread.Sleep(2000);
                 Clear();
             }
-            else
+            else if(!response.IsSuccessStatusCode)
             {
-                WriteLine($"This game {games.Title} is occupied");
+                WriteLine($"This game {games.Title} is occupied or Empty");
                 Thread.Sleep(2000);
                 Clear();
             }
         }
+
 
         private static void DeleteGame()
         {
@@ -334,14 +336,14 @@ namespace HighScoreManager
             if (response.IsSuccessStatusCode)
             {
                 Clear();
-                WriteLine($"{game.Id} Succcesfull delete");
+                WriteLine($"{game.Id} Succcesfull delete!");
                 Thread.Sleep(2000);
                 Clear();
             }
             else
             {
                 Clear();
-                WriteLine($"Someting went wrong, game {game.Id} not deleted");
+                WriteLine($"Game {game.Id} dosn't exist, NOT deleted!");
                 Thread.Sleep(2000);
                 Clear();
             }
