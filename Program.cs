@@ -14,19 +14,19 @@ namespace HighScoreManager
 
         static void Main(string[] args)
         {
-            httpClient.BaseAddress = new Uri("https://localhost:5001/api/");
-
             CursorVisible = true;
 
-            MainMenu();
+            httpClient.BaseAddress = new Uri("https://localhost:5001/api/");
 
+            MainMenu();
         }
 
 
         private static void MainMenu()
         {
+            CursorVisible = false;
 
-            bool applicationRunning = true;
+            bool programRunning = true;
 
             do
             {
@@ -65,21 +65,21 @@ namespace HighScoreManager
                     case ConsoleKey.D5:
                     case ConsoleKey.NumPad5:
 
-                        applicationRunning = false;
+                        programRunning = false;
 
                         break;
                 }
 
                 Clear();
 
-            } while (applicationRunning);
-
+            } while (programRunning);
         }
 
 
         private static void RegisterHighScore()
         {
-            bool programRuning = true;
+            CursorVisible = true;
+            bool programRunning = true;
 
             do
             {
@@ -91,19 +91,19 @@ namespace HighScoreManager
                 try
                 {
                     SetCursorPosition(10, 0);
-                    string addGameTitle = ReadLine().Trim(); 
+                    string addGameTitle = ReadLine().Trim();
 
                     SetCursorPosition(10, 1);
                     string addPlayer = ReadLine().Trim().ToUpper();
 
                     SetCursorPosition(10, 2);
-                    string addDate = ReadLine().Trim().ToUpper();
+                    string addDate = ReadLine().Trim();
 
                     SetCursorPosition(10, 3);
                     int addScore = int.Parse(ReadLine().Trim());
 
                     SetCursorPosition(5, 8);
-                    WriteLine("Is this correct [Y]es / [N]o?  [Esc] Back to main");
+                    WriteLine("Is this correct [Y]es / [N]o ?  [Esc] Back to main");
                     var userInput = ReadKey(true).Key;
 
                     while (userInput != ConsoleKey.Y && userInput != ConsoleKey.N && userInput != ConsoleKey.Escape)
@@ -117,22 +117,21 @@ namespace HighScoreManager
                     {
                         PostGame(addGameTitle, addPlayer, addDate, addScore);
 
-                        programRuning = false;
+                        programRunning = false;
                     }
 
                     if (userInput == ConsoleKey.N)
                     {
-                        programRuning = true;
+                        programRunning = true;
                         Clear();
                     }
                     else if (userInput == ConsoleKey.Escape)
                     {
                         Clear();
-                        programRuning = false;
+                        programRunning = false;
                         MainMenu();
                         Clear();
                     }
-
                 }
                 catch (Exception e)
                 {
@@ -143,7 +142,7 @@ namespace HighScoreManager
                     Clear();
                 }
 
-            } while (programRuning);
+            } while (programRunning);
         }
 
 
@@ -177,7 +176,7 @@ namespace HighScoreManager
             else
             {
                 Clear();
-                WriteLine($"Something went wrong, couldn't register this {highScores.Score} highscore!");
+                WriteLine($"The Game dosn't exist, try agin!");
                 Thread.Sleep(2000);
                 Clear();
             }
@@ -186,33 +185,52 @@ namespace HighScoreManager
 
         private static void ListGame()
         {
-            var response = httpClient.GetAsync("games")
-                 .GetAwaiter()
-                 .GetResult();
+            bool programRunning = true;
 
-            if (response.IsSuccessStatusCode)
+            do
             {
-                var jsonString = response.Content.ReadAsStringAsync()
-                    .Result;
+                var response = httpClient.GetAsync("games")
+                     .GetAwaiter()
+                     .GetResult();
 
-                var games = JsonConvert.DeserializeObject<IEnumerable<Game>>(jsonString);
-
-                WriteLine(" Id     Game");
-                WriteLine("==============");
-
-                foreach (var game in games)
+                if (response.IsSuccessStatusCode)
                 {
-                    WriteLine($" {game.Id}\t{game.Title}");
-                }
-            }
+                    var jsonString = response.Content.ReadAsStringAsync()
+                        .Result;
 
-            ReadKey(true);
+                    var games = JsonConvert.DeserializeObject<IEnumerable<Game>>(jsonString);
+
+                    WriteLine(" Id     Game");
+                    WriteLine("==============");
+
+                    foreach (var game in games)
+                    {
+                        WriteLine($" {game.Id}\t{game.Title}");
+                    }
+                }
+
+                WriteLine("[Esc] Back to main");
+                var userInput = ReadKey(true).Key;
+
+                while (userInput == ConsoleKey.Escape)
+                {
+                    Clear();
+                    programRunning = false;
+                    MainMenu();
+                    Clear();
+                }
+
+                Clear();
+
+            } while (programRunning);
         }
 
 
         private static void AddGame()
         {
-            bool programRuning = true;
+            CursorVisible = true;
+
+            bool programRunning = true;
 
             do
             {
@@ -225,22 +243,22 @@ namespace HighScoreManager
                 try
                 {
                     SetCursorPosition(15, 0);
-                    string addTitle = ReadLine().Trim().ToUpper();
+                    string addTitle = ReadLine().Trim();
 
                     SetCursorPosition(15, 1);
-                    string addDescription = ReadLine().Trim().ToUpper();
+                    string addDescription = ReadLine().Trim();
 
                     SetCursorPosition(15, 2);
-                    string addGenre = ReadLine().Trim().ToUpper();
+                    string addGenre = ReadLine().Trim();
 
                     SetCursorPosition(15, 3);
-                    string addRealeaseYear = ReadLine().Trim().ToUpper();
+                    string addRealeaseYear = ReadLine().Trim();
 
                     SetCursorPosition(15, 4);
                     string addImageUrl = ReadLine().Trim();
 
                     SetCursorPosition(5, 8);
-                    WriteLine("Is this correct [Y]es / [N]o?  [Esc] Back to main");
+                    WriteLine("Is this correct [Y]es / [N]o ?  [Esc] Back to main");
                     var userInput = ReadKey(true).Key;
 
                     while (userInput != ConsoleKey.Y && userInput != ConsoleKey.N && userInput != ConsoleKey.Escape)
@@ -254,18 +272,18 @@ namespace HighScoreManager
                     {
                         PostGame(addTitle, addDescription, addGenre, addRealeaseYear, addImageUrl);
 
-                        programRuning = false;
+                        programRunning = false;
                     }
 
                     if (userInput == ConsoleKey.N)
                     {
-                        programRuning = true;
+                        programRunning = true;
                         Clear();
                     }
                     else if (userInput == ConsoleKey.Escape)
                     {
                         Clear();
-                        programRuning = false;
+                        programRunning = false;
                         MainMenu();
                         Clear();
                     }
@@ -279,7 +297,7 @@ namespace HighScoreManager
                     Clear();
                 }
 
-            } while (programRuning);
+            } while (programRunning);
         }
 
 
@@ -309,7 +327,7 @@ namespace HighScoreManager
                 Thread.Sleep(2000);
                 Clear();
             }
-            else if(!response.IsSuccessStatusCode)
+            else if (!response.IsSuccessStatusCode)
             {
                 WriteLine($"This game {games.Title} is occupied or Empty");
                 Thread.Sleep(2000);
@@ -320,33 +338,83 @@ namespace HighScoreManager
 
         private static void DeleteGame()
         {
-            Write("ID: ");
-            int deletId = int.Parse(ReadLine().Trim());
+            CursorVisible = true;
 
-            Game game = new Game()
+            bool programRunning = true;
+
+            do
             {
-                Id = deletId
-            };
+                try
+                {
 
-            var response = httpClient.DeleteAsync("https://localhost:5001/api/games/" + game.Id)
-                .Result;
+                    Write("ID: ");
+                    int deletId = int.Parse(ReadLine().Trim());
 
-            response.Content.ReadAsStringAsync();
+                    Game game = new Game()
+                    {
+                        Id = deletId
+                    };
 
-            if (response.IsSuccessStatusCode)
-            {
-                Clear();
-                WriteLine($"{game.Id} Succcesfull delete!");
-                Thread.Sleep(2000);
-                Clear();
-            }
-            else
-            {
-                Clear();
-                WriteLine($"Game {game.Id} dosn't exist, NOT deleted!");
-                Thread.Sleep(2000);
-                Clear();
-            }
+                    var response = httpClient.DeleteAsync("https://localhost:5001/api/games/" + game.Id)
+                        .Result;
+
+                    response.Content.ReadAsStringAsync();
+
+                    SetCursorPosition(5, 4);
+                    WriteLine("Are you sure [Y]es / [N]o ?  [Esc] Back to main");
+                    var userInput = ReadKey(true).Key;
+
+                    while (userInput != ConsoleKey.Y && userInput != ConsoleKey.N && userInput != ConsoleKey.Escape)
+                    {
+                        userInput = ReadKey(true).Key;
+                    }
+
+                    Clear();
+
+                    if (userInput == ConsoleKey.Y)
+                    {
+                        if (response.IsSuccessStatusCode)
+                        {
+                            Clear();
+                            WriteLine($"{game.Id} Succcesfull delete!");
+                            Thread.Sleep(2000);
+                            Clear();
+                        }
+                        else
+                        {
+                            Clear();
+                            WriteLine($"ID {game.Id} dosn't exist, NOT deleted!");
+                            Thread.Sleep(2000);
+                            Clear();
+                        }
+
+                        programRunning = false;
+                    }
+
+                    if (userInput == ConsoleKey.N)
+                    {
+                        programRunning = true;
+                        Clear();
+                    }
+                    else if (userInput == ConsoleKey.Escape)
+                    {
+                        Clear();
+                        programRunning = false;
+                        //MainMenu();
+                        Clear();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Clear();
+                    SetCursorPosition(6, 4);
+                    WriteLine(e.Message);
+                    Thread.Sleep(2000);
+                    Clear();
+                }
+
+            } while (programRunning);
+
         }
     }
 }
